@@ -1,0 +1,7 @@
+z.sh
+tmp
+*.pem
+*.key
+.terraform
+*.lock.hcl
+*.plan
