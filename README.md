@@ -1,11 +1,31 @@
 # LSEG-coding-challenge
 
-Terraform version: 1.3.0
-Created a three tier arhitecture with cloudfront serving the front-end, alb+asg for backend, and postgres aurora as database.
-IMPORTANT: arhitecture wasn't deployed anywhere and has some blockers to do so: ssl certs, alb->cf dependency.
+Created a three tier arhitecture with cloudfront serving the front-end, alb+asg for backend, and postgres aurora as database. Please reffer to the attached diagram for visual presentation.
 
 
-Terraform will perform the following actions:
+IMPORTANT: 
+  - infrastructure is not deployed as it costs a significant amount
+  - has some blockers to do so: ssl certs, alb->cf dependency.
+  - terraform state bucket is commented out to allow planning from local
+  - infrastructure is not deployed as it costs a significant amount
+
+Usage: 
+  - gitlab pipeline was added to help with the deployment, it's mainly a standard grade pipeline that can be changed
+  - code was designed with multiple modules in order to increase code reusability.
+  - all the base resources are sotre in /modules folder
+  - in the three_tier_app folder resides the call of the modules and in the file dev.json all the necesary variables are stored 
+  - in case a new environment is needed a new .json can be created and the call from main.tf line 2 has to be changed   
+  - Version used to apply terraform version: 1.3.0
+
+Data flow:
+  - When a user is accessing the site thru the internet it hist firstly route53 for DNS translation, then it get redirected to cloudfront
+  - The CF servers the static content from s3 or it redirects the request to the ALB which resides in 2 public subnets
+  - Based on the listener rules it fw the requests to the backend ec2 which reside in separate subnet
+  - When neeed the backend contact the DB that also lives in a separate subnet.  
+
+
+
+Below terraform plan output:
 
   # module.alb.aws_acm_certificate.this will be created
   + resource "aws_acm_certificate" "this" {

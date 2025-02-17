@@ -1,7 +1,10 @@
 locals {
+  #dev.json file saves all the vars need for deploy
+  #change here in case another set of vars is needed
   config = jsondecode(file("dev.json"))
 }
 
+#deploys vpc, nat gw, igw, subnets
 module "network" {
   source = "../modules/network"
 
@@ -11,6 +14,7 @@ module "network" {
   subnets_db = local.config.network.subnets_db
 }
 
+#deploys sg attached to the load balancer
 module "alb_sg" {
   source = "../modules/security_group"
   security_groups = {
@@ -24,6 +28,7 @@ module "alb_sg" {
   }
 }
 
+#module for load balancer, target group, listeners (80 and 443) and acm cert attached
 module "alb" {
   source = "../modules/alb"
   domain_name = "test.lseg.com"
@@ -37,6 +42,7 @@ module "alb" {
   }
 }
 
+#deploys sg attached to the ec2 that are running the backend
 module "app_sg" {
   source = "../modules/security_group"
   security_groups = {
@@ -50,6 +56,7 @@ module "app_sg" {
   }
 }
 
+#deploys auto-scaling group,launch template and the iam role to be attached to the ec2s 
 module "asg" {
   source = "../modules/asg"
 
@@ -66,6 +73,7 @@ module "asg" {
   }
 }
 
+#deploys sg attached to the database
 module "db_sg" {
   source = "../modules/security_group"
   security_groups = {
@@ -79,6 +87,7 @@ module "db_sg" {
   }
 }
 
+#deploys an aurora postgres to be used by the backend services
 module "rds" {
   source = "../modules/rds"
   config = {
@@ -96,6 +105,8 @@ module "rds" {
   }
 }
 
+#deploys and cloudfront with s3 to server the static content from and separate action for alb backend 
+#and also acm certificate needed for CF
 module "frontend" {
   source = "../modules/frontend"
 
